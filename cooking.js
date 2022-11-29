@@ -19,7 +19,6 @@
 // Fulfilled
 // Rejected
 
-
 function setupMovieNight() {
   await cookPopcorn()
   await pourDrinks()
