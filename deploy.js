@@ -1,25 +1,28 @@
 const ethers = require("ethers");
-const fs = require("fs-extra"); // reads abi and bin files
+const fs = require("fs-extra"); // Reads abi and bin files
 
 async function main() {
   const provider = new ethers.providers.JsonRpcProvider(
     "http://127.0.0.1:8545/"
-  );
+  ); // Connect to Ganache instance
   const wallet = new ethers.Wallet(
     "0x416e2779afc2d2b1ab33712fa32400ad22810e1aac43414621f0749996b6e492",
     provider
-  );
+  ); // Connect a wallet with private key
   const abi = fs.readFileSync("./SimpleStorage_sol_SimpleStorage.abi", "utf8");
   const binary = fs.readFileSync(
     "./SimpleStorage_sol_SimpleStorage.bin",
     "utf8"
   );
 
+  // Get ABI and binary data to allow wallet to deploy contract
   const contractFactory = new ethers.ContractFactory(abi, binary, wallet);
   console.log("Deploying, please wait...");
   const contract = await contractFactory.deploy(); // Tell code to stop and wait for code to deploy
-  const transactionReceipt = await contract.deployTransaction.wait(1); // wait 1 block confirmation
-  console.log(transactionReceipt);
+  await contract.deployTransaction.wait(1); // wait 1 block confirmation
+
+  // const transactionReceipt = await contract.deployTransaction.wait(1);
+  // console.log(transactionReceipt);
   // console.log("Let's deploy with only transaction data");
   // const nonce = await wallet.getTransactionCount();
   // const tx = {
@@ -35,6 +38,14 @@ async function main() {
   // const sentTxResponse = await wallet.sendTransaction(tx); // signs then sends tx
   // await sentTxResponse.wait(1);
   // console.log(sentTxResponse);
+
+  // Get number
+  const currentFavouriteNumber = await contract.retrieve(); // no gas cost
+  console.log(`Current Favourite Number: ${currentFavouriteNumber.toString()}`);
+  const transctionResponse = await contract.store("14");
+  const transactionReceipt = await transctionResponse.wait(1);
+  const updatedFavouriteNumber = await contract.retrieve(); // no gas cost
+  console.log(`Updated Favourite Number: ${updatedFavouriteNumber.toString()}`);
 }
 
 main()
