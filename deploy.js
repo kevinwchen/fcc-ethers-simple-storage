@@ -1,25 +1,30 @@
-const ethers = require("ethers");
-const fs = require("fs-extra"); // Reads abi and bin files
+const ethers = require("ethers")
+const fs = require("fs-extra") // Reads abi and bin files
+require("dotenv").config()
 
 async function main() {
-  const provider = new ethers.providers.JsonRpcProvider(
-    "http://127.0.0.1:8545/"
-  ); // Connect to Ganache instance
-  const wallet = new ethers.Wallet(
-    "0x416e2779afc2d2b1ab33712fa32400ad22810e1aac43414621f0749996b6e492",
-    provider
-  ); // Connect a wallet with private key
-  const abi = fs.readFileSync("./SimpleStorage_sol_SimpleStorage.abi", "utf8");
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL) // Connect to Ganache instance
+  // const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider); // Connect a wallet with private key
+
+  // Refactor to use encrypted private key
+  const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8")
+  let wallet = new ethers.Wallet.fromEncryptedJsonSync(
+    encryptedJson,
+    process.env.PRIVATE_KEY_PASSWORD
+  )
+  wallet = await wallet.connect(provider)
+
+  const abi = fs.readFileSync("./SimpleStorage_sol_SimpleStorage.abi", "utf8")
   const binary = fs.readFileSync(
     "./SimpleStorage_sol_SimpleStorage.bin",
     "utf8"
-  );
+  )
 
   // Get ABI and binary data to allow wallet to deploy contract
-  const contractFactory = new ethers.ContractFactory(abi, binary, wallet);
-  console.log("Deploying, please wait...");
-  const contract = await contractFactory.deploy(); // Tell code to stop and wait for code to deploy
-  await contract.deployTransaction.wait(1); // wait 1 block confirmation
+  const contractFactory = new ethers.ContractFactory(abi, binary, wallet)
+  console.log("Deploying, please wait...")
+  const contract = await contractFactory.deploy() // Tell code to stop and wait for code to deploy
+  await contract.deployTransaction.wait(1) // wait 1 block confirmation
 
   // const transactionReceipt = await contract.deployTransaction.wait(1);
   // console.log(transactionReceipt);
@@ -40,17 +45,17 @@ async function main() {
   // console.log(sentTxResponse);
 
   // Get number
-  const currentFavouriteNumber = await contract.retrieve(); // no gas cost
-  console.log(`Current Favourite Number: ${currentFavouriteNumber.toString()}`);
-  const transctionResponse = await contract.store("14");
-  const transactionReceipt = await transctionResponse.wait(1);
-  const updatedFavouriteNumber = await contract.retrieve(); // no gas cost
-  console.log(`Updated Favourite Number: ${updatedFavouriteNumber.toString()}`);
+  const currentFavouriteNumber = await contract.retrieve() // no gas cost
+  console.log(`Current Favourite Number: ${currentFavouriteNumber.toString()}`)
+  const transctionResponse = await contract.store("14")
+  const transactionReceipt = await transctionResponse.wait(1)
+  const updatedFavouriteNumber = await contract.retrieve() // no gas cost
+  console.log(`Updated Favourite Number: ${updatedFavouriteNumber.toString()}`)
 }
 
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+    console.error(error)
+    process.exit(1)
+  })
