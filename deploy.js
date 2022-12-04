@@ -4,15 +4,15 @@ require("dotenv").config()
 
 async function main() {
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL) // Connect to Ganache instance
-  // const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider); // Connect a wallet with private key
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider) // Connect a wallet with private key
 
-  // Refactor to use encrypted private key
-  const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8")
-  let wallet = new ethers.Wallet.fromEncryptedJsonSync(
-    encryptedJson,
-    process.env.PRIVATE_KEY_PASSWORD
-  )
-  wallet = await wallet.connect(provider)
+  // Alternate method using encrypted private key
+  // const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8")
+  // let wallet = new ethers.Wallet.fromEncryptedJsonSync(
+  //   encryptedJson,
+  //   process.env.PRIVATE_KEY_PASSWORD
+  // )
+  // wallet = await wallet.connect(provider)
 
   const abi = fs.readFileSync("./SimpleStorage_sol_SimpleStorage.abi", "utf8")
   const binary = fs.readFileSync(
@@ -25,6 +25,7 @@ async function main() {
   console.log("Deploying, please wait...")
   const contract = await contractFactory.deploy() // Tell code to stop and wait for code to deploy
   await contract.deployTransaction.wait(1) // wait 1 block confirmation
+  console.log(`Contract Address: ${contract.address}`)
 
   // const transactionReceipt = await contract.deployTransaction.wait(1);
   // console.log(transactionReceipt);
