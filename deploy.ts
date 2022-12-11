@@ -1,10 +1,14 @@
-const ethers = require("ethers")
-const fs = require("fs-extra") // Reads abi and bin files
-require("dotenv").config()
+// const ethers = require("ethers")
+// const fs = require("fs-extra") // Reads abi and bin files
+// require("dotenv").config()
+
+import { ethers } from "ethers"
+import * as fs from "fs-extra"
+import "dotenv/config"
 
 async function main() {
-  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL) // Connect to Ganache instance
-  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider) // Connect a wallet with private key
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL!) // Connect to Ganache instance
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider) // Connect a wallet with private key
 
   // Alternate method using encrypted private key
   // const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8")
